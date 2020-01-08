@@ -1,0 +1,25 @@
+{
+  "name": "woopwoopbot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ghoelian/WoopWoopBot.git"
+  },
+  "author": "Julian Vos",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ghoelian/WoopWoopBot/issues"
+  },
+  "homepage": "https://github.com/Ghoelian/WoopWoopBot#readme",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "tmi": "^2.0.0"
+  }
+}
