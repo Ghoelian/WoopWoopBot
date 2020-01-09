@@ -1,6 +1,7 @@
 const tmi = require('tmi.js')
 const request = require('request')
-require('dotenv').load()
+const fs = require('fs')
+require('dotenv').config()
 
 const opts = {
   identity: {
@@ -12,31 +13,31 @@ const opts = {
   ]
 }
 
-const client = new tmi.client(opts)
+const key = JSON.parse(fs.readFileSync('.key.json'))
+
+const client = new tmi.Client(opts)
 
 const addSong = (spotifyURL) => {
-  // https://open.spotify.com/track/2c4s8OFu1IkIDdNA953M03
-  // spotify:track:2c4s8OFu1IkIDdNA953M03
   const temp = spotifyURL.split('/')
   const spotifyURI = `spotify:track:${temp[4]}`
   let result = 'Oi wut nothin happen'
 
+  console.log(key.SPOTIFY_USER_KEY)
   request({
     headers: {
-      'Authorization': process.env.SPOTIFY_API_SECRET,
-      'Content-Type': 'application/json',
+      Authorization: key.SPOTIFY_USER_KEY,
+      'Content-Type': 'application/json'
     },
     method: 'POST',
-    url: `https://api.spotify.com/v1/playlists/${process.env.SPOTIFY_PLAYLIST_ID}/tracks`,
-    uri: spotifyURI
+    url: `https://api.spotify.com/v1/playlists/${process.env.SPOTIFY_PLAYLIST_ID}/tracks?uris=${spotifyURI}`
   },
-    function (error, response, body) {
-      if (error) {
-        result = 'We not good bois ' + error
-      } else {
-        result = 'We good bois'
-      }
+  (error, response, body) => {
+    if (error) {
+      result = 'We not good bois ' + error
+    } else {
+      result = 'We good bois'
     }
+  }
   )
   return result
 }
