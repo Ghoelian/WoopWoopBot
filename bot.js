@@ -1,6 +1,7 @@
 const tmi = require('tmi.js')
 const request = require('request')
-require('dotenv').load()
+const fs = require('fs')
+require('dotenv').config()
 
 const opts = {
   identity: {
@@ -12,32 +13,34 @@ const opts = {
   ]
 }
 
-const client = new tmi.client(opts)
+const access = JSON.parse(fs.readFileSync('access.json'))
+
+const client = new tmi.Client(opts)
 
 const addSong = (spotifyURL) => {
-  // https://open.spotify.com/track/2c4s8OFu1IkIDdNA953M03
-  // spotify:track:2c4s8OFu1IkIDdNA953M03
-  const temp = spotifyURL.split('/')
-  const spotifyURI = `spotify:track:${temp[4]}`
-  let result = 'Oi wut nothin happen'
+  const spotifyURI = checkFormat(spotifyURL)
+  let result = 'Song added to queue!'
 
-  request({
-    headers: {
-      'Authorization': process.env.SPOTIFY_API_SECRET,
-      'Content-Type': 'application/json',
+  if (spotifyURI === undefined) {
+    result = 'This is not a supported URL format.'
+  } else {
+    request({
+      headers: {
+        Authorization: 'Bearer ' + access.SPOTIFY_USER_ACCESS,
+        'Content-Type': 'application/json'
+      },
+      method: 'POST',
+      url: `https://api.spotify.com/v1/playlists/${process.env.SPOTIFY_PLAYLIST_ID}/tracks?uris=${spotifyURI}`
     },
-    method: 'POST',
-    url: `https://api.spotify.com/v1/playlists/${process.env.SPOTIFY_PLAYLIST_ID}/tracks`,
-    uri: spotifyURI
-  },
-    function (error, response, body) {
+    (error, response, body) => {
       if (error) {
         result = 'We not good bois ' + error
       } else {
         result = 'We good bois'
       }
-    }
-  )
+    })
+  }
+
   return result
 }
 
@@ -70,6 +73,24 @@ const onMessageHandler = (target, context, msg, self) => {
 
 const onConnectedHandler = (addr, port) => {
   console.log(`Connected to ${addr}:${port}`)
+}
+
+const checkFormat = (link) => {
+  let buffer
+  let uri
+
+  for (let i = 0; i < 7; i++) {
+    buffer += link.charAt(i)
+  }
+
+  if (buffer === 'spotify') {
+    uri = link
+  } else if (buffer === 'https:/') {
+    const temp = link.split('/')
+    uri = `spotify:track:${temp[4]}`
+  }
+
+  return uri
 }
 
 client.on('message', onMessageHandler)
