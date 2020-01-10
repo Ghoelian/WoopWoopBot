@@ -20,7 +20,6 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "tmi": "^2.0.0",
     "tmi.js": "^1.5.0",
     "uid": "0.0.2"
   }
