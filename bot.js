@@ -13,7 +13,7 @@ const opts = {
   ]
 }
 
-const key = JSON.parse(fs.readFileSync('.key.json'))
+const key = JSON.parse(fs.readFileSync('auth.json'))
 
 const client = new tmi.Client(opts)
 
@@ -22,7 +22,6 @@ const addSong = (spotifyURL) => {
   const spotifyURI = `spotify:track:${temp[4]}`
   let result = 'Oi wut nothin happen'
 
-  console.log(key.SPOTIFY_USER_KEY)
   request({
     headers: {
       Authorization: key.SPOTIFY_USER_KEY,
