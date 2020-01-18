@@ -96,7 +96,9 @@ const checkFormat = (link) => {
   let uri
 
   for (let i = 0; i < 7; i++) {
-    buffer += link.charAt(i)
+    if (link.charAt(i) !== undefined) {
+      buffer += link.charAt(i)
+    }
   }
 
   if (buffer === 'spotify') {
