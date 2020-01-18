@@ -96,7 +96,7 @@ const checkFormat = (link) => {
   let uri
 
   for (let i = 0; i < 7; i++) {
-    if (link.charAt(i) !== undefined) {
+    if (link !== undefined) {
       buffer += link.charAt(i)
     }
   }
