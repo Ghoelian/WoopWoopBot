@@ -1,6 +1,7 @@
 const tmi = require('tmi.js')
 const request = require('request')
 const fs = require('fs')
+const server = require('./server.js')
 require('dotenv').config()
 
 const opts = {
@@ -13,11 +14,11 @@ const opts = {
   ]
 }
 
-const access = JSON.parse(fs.readFileSync('access.json'))
-
 const client = new tmi.Client(opts)
 
 const addSong = (spotifyURL) => {
+  const access = JSON.parse(fs.readFileSync('access.json'))
+
   const spotifyURI = checkFormat(spotifyURL)
   let result = 'Song added to queue!'
 
@@ -33,10 +34,26 @@ const addSong = (spotifyURL) => {
       url: `https://api.spotify.com/v1/playlists/${process.env.SPOTIFY_PLAYLIST_ID}/tracks?uris=${spotifyURI}`
     },
     (error, response, body) => {
-      if (error) {
-        result = 'We not good bois ' + error
+      if (error || JSON.parse(body).error) {
+        if (JSON.parse(body).error) {
+          if (JSON.parse(body).error.message === 'The access token expired') {
+            if (server.refresh() === 0) {
+              console.log('[Bot] Refreshed token')
+              result = 'Refreshed token, please try adding the song again.'
+            } else {
+              console.log('[Bot] Function server.refresh() returned exit code 1.')
+              result = 'Refreshing token failed.'
+            }
+          }
+
+          console.log('[Bot] We not good bois\n' + JSON.parse(body).error.status + '\n' + JSON.parse(body).error.message)
+          result = 'Something went wrong'
+        } else {
+          console.log(error)
+          result = 'Something went wrong'
+        }
       } else {
-        result = 'We good bois'
+        result = 'Song added to queue!'
       }
     })
   }
@@ -67,16 +84,15 @@ const onMessageHandler = (target, context, msg, self) => {
     const result = addSong(songURL)
     console.log(result)
     client.say(target, result)
-    console.log(`Executed ${commandName} command`)
   }
 }
 
 const onConnectedHandler = (addr, port) => {
-  console.log(`Connected to ${addr}:${port}`)
+  console.log(`[Bot] Connected to ${addr}:${port}`)
 }
 
 const checkFormat = (link) => {
-  let buffer
+  let buffer = ''
   let uri
 
   for (let i = 0; i < 7; i++) {
